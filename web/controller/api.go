@@ -18,19 +18,28 @@ func NewAPIController(g *gin.RouterGroup) *APIController {
 
 func (a *APIController) initRouter(g *gin.RouterGroup) {
 	g = g.Group("/xui/API/inbounds")
-	g.Use(a.checkLogin)
-
+	g.Use(a.checkLogin)		
 	g.GET("/", a.inbounds)
 	g.GET("/get/:id", a.inbound)
 	g.POST("/add", a.addInbound)
 	g.POST("/del/:id", a.delInbound)
 	g.POST("/update/:id", a.updateInbound)
+	g.GET("/clientIps/:email", a.getClientIps)
 
 	
 	a.inboundController = NewInboundController(g)
 }
 
+func (a *InboundController) getClientIps(c *gin.Context) {
+	email := c.Param("email")
 
+	ips , err := a.inboundService.GetInboundClientIps(email)
+	if err != nil {
+		jsonObj(c, "No IP Record", nil)
+		return
+	}
+	jsonObj(c, ips, nil)
+}
 func (a *APIController) inbounds(c *gin.Context) {
 	a.inboundController.getInbounds(c)
 }
